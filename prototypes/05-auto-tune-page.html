@@ -30,23 +30,23 @@ Use this action for critical assets"><svg class="MuiSvgIcon-root MuiSvgIcon-font
   function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded',fn); }
   var WAND='<svg viewBox="0 0 24 24" width="16" height="16" style="fill:currentColor;"><path d="M7.5 5.6 10 7 8.6 4.5 10 2 7.5 3.4 5 2l1.4 2.5L5 7zm12 9.8L17 14l1.4 2.5L17 19l2.5-1.4L22 19l-1.4-2.5L22 14zM22 2l-2.5 1.4L17 2l1.4 2.5L17 7l2.5-1.4L22 7l-1.4-2.5zm-7.63 5.29c-.39-.39-1.02-.39-1.41 0L1.29 18.96c-.39.39-.39 1.02 0 1.41l2.34 2.34c.39.39 1.02.39 1.41 0L16.7 11.05c.39-.39.39-1.02 0-1.41zm-1.03 5.49-2.12-2.12 2.44-2.44 2.12 2.12z"></path></svg>';
   var TYPES={
-    tuned:{c:'#0f6e56',bg:'rgba(15,110,86,0.10)',l:'Tuned'},
-    verified:{c:'#0f6e56',bg:'rgba(15,110,86,0.10)',l:'Verified'},
+    tuned:{c:'#5f5e5a',bg:'rgba(0,0,0,0.05)',l:'Tuned'},
+    verified:{c:'#5f5e5a',bg:'rgba(0,0,0,0.05)',l:'Verified'},
     reverted:{c:'#b45309',bg:'rgba(180,83,9,0.10)',l:'Reverted'},
     learned:{c:'#5f5e5a',bg:'rgba(0,0,0,0.05)',l:'Learned'},
     guard:{c:'#b45309',bg:'rgba(180,83,9,0.10)',l:'Guardrail'}
   };
   var LOG=[
-    {t:'tuned',when:'2h ago',pipe:'categories_offline',msg:'Workers 12 → 8. Projected −$8,640/mo.',res:'within SLA'},
-    {t:'verified',when:'5h ago',pipe:'flight_analytics',msg:'Memory 16 → 12 GB held SLA across 5 runs.',res:'retained'},
-    {t:'reverted',when:'9h ago',pipe:'ingestion-under-utilized-cpu',msg:'Restored workers after p95 latency +18% breach.',res:'auto-rolled back'},
-    {t:'learned',when:'14h ago',pipe:'player_stats_agg',msg:'Established utilization baseline (34%) over 20 runs.',res:'baseline saved'},
-    {t:'tuned',when:'1d ago',pipe:'notebook_task_partitioned',msg:'Workers 20 → 16. Saved 7% compute.',res:'within SLA'},
-    {t:'guard',when:'1d ago',pipe:'sport-over-provision',msg:'Paused tuning — awaiting 3 stable runs before next step.',res:'observing'},
-    {t:'tuned',when:'2d ago',pipe:'npart_data_spe',msg:'spark.executor.instances 100 → 64. −91% vCore waste.',res:'within SLA'},
-    {t:'verified',when:'3d ago',pipe:'categories_offline',msg:'Confirmed no spill/OOM after worker reduction.',res:'retained'},
-    {t:'tuned',when:'4d ago',pipe:'hourly-usage-tracking-cores',msg:'Cores 64 → 48 after sustained 22% utilization.',res:'within SLA'},
-    {t:'learned',when:'5d ago',pipe:'bids-machine-type',msg:'Detected weekly seasonality; widened observation window.',res:'model updated'}
+    {t:'tuned',when:'2h ago',pipe:'categories_offline',msg:'−18% cost this run, runtime unchanged (workers 12→8)',res:'within SLA'},
+    {t:'verified',when:'5h ago',pipe:'flight_analytics',msg:'Savings held across 5 runs, no performance impact',res:'retained'},
+    {t:'reverted',when:'9h ago',pipe:'ingestion-under-utilized-cpu',msg:'Runtime regression detected — rolled back automatically, no harm',res:'auto-rolled back'},
+    {t:'learned',when:'14h ago',pipe:'player_stats_agg',msg:'Learning this job baseline before adjusting (20 runs)',res:'baseline saved'},
+    {t:'tuned',when:'1d ago',pipe:'notebook_task_partitioned',msg:'−7% cost this run, runtime unchanged (workers 20→16)',res:'within SLA'},
+    {t:'guard',when:'1d ago',pipe:'sport-over-provision',msg:'Holding — watching 3 runs before the next change',res:'observing'},
+    {t:'tuned',when:'2d ago',pipe:'npart_data_spe',msg:'−91% vCore waste, runtime unchanged',res:'within SLA'},
+    {t:'verified',when:'3d ago',pipe:'categories_offline',msg:'Confirmed no spill or OOM after the change',res:'retained'},
+    {t:'tuned',when:'4d ago',pipe:'hourly-usage-tracking-cores',msg:'−12% cost this run, runtime unchanged (cores 64→48)',res:'within SLA'},
+    {t:'learned',when:'5d ago',pipe:'bids-machine-type',msg:'Learned weekly seasonality — adjusting cadence, no change yet',res:'model updated'}
   ];
 
   ready(function(){
@@ -86,7 +86,7 @@ Use this action for critical assets"><svg class="MuiSvgIcon-root MuiSvgIcon-font
         main.innerHTML=
           '<div style="max-width:980px;">'
           +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;"><span style="color:var(--mui-palette-primary-main);">'+WAND+'</span><h1 style="font-size:20px;font-weight:600;color:#292929;margin:0;">Auto-Tune</h1></div>'
-          +'<div style="font-size:13px;color:#888;margin-bottom:16px;">Autonomous tuning activity across all pipelines · every action logged</div>'
+          +'<div style="font-size:13px;color:#888;margin-bottom:16px;">Per-run impact since Auto-Tune took over · across all pipelines</div>'
           +'<div style="display:flex;gap:12px;margin-bottom:18px;">'+stat('$38K','Saved · 30 days')+stat('10','Actions')+stat('12','Pipelines tuned')+stat('1','Auto-reverts')+stat('+0.1%','Avg perf impact')+'</div>'
           +'<div style="display:flex;gap:8px;margin-bottom:6px;flex-wrap:wrap;">'+chips+'</div>'
           +'<div style="background:var(--mui-palette-background-paper);border:1px solid rgba(0,0,0,0.08);border-radius:8px;overflow:hidden;" id="at-log-list">'+LOG.map(rowHTML).join('')+'</div>'
