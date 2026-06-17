@@ -245,10 +245,16 @@ var row=cardB.parentElement;
           '<div style="display:flex;flex-direction:column;height:100%;">'
           +'<h2 class="text-sm color-primary">Savings opportunity</h2>'
           +'<div class="fl-text-lg/2xl font-bold leading-none" style="margin-top:6px;">$427K</div>'
-          +'<a id="at-combined-link" href="javascript:void(0)" style="margin-top:auto;padding-top:10px;border-top:1px solid rgba(0,0,0,0.1);text-decoration:none;display:flex;align-items:center;justify-content:space-between;gap:8px;">'
-            +'<span style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--mui-palette-primary-dark);">'+WAND+'Auto-Tune</span>'
-            +'<span style="font-size:12px;font-weight:600;color:var(--mui-palette-primary-dark);white-space:nowrap;">$38K &#8594;</span>'
-          +'</a>'
+          +'<div style="margin-top:auto;padding-top:10px;border-top:1px solid rgba(0,0,0,0.1);display:flex;flex-direction:column;gap:7px;">'
+            +'<a id="at-combined-link" href="javascript:void(0)" style="text-decoration:none;display:flex;align-items:center;justify-content:space-between;gap:8px;">'
+              +'<span style="display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;color:var(--mui-palette-primary-dark);">'+WAND+'Auto-Tune saved</span>'
+              +'<span style="font-size:12px;font-weight:600;color:var(--mui-palette-primary-dark);white-space:nowrap;">$38K &#8594;</span>'
+            +'</a>'
+            +'<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">'
+              +'<span style="font-size:12px;color:var(--mui-palette-text-secondary);">Manual opportunities</span>'
+              +'<span style="font-size:12px;font-weight:600;color:#292929;white-space:nowrap;">$54K</span>'
+            +'</div>'
+          +'</div>'
           +'</div>';
         var lk=cardA.querySelector('#at-combined-link');
         if(lk) lk.onclick=function(){ if(window.__openAutoTuneLog) window.__openAutoTuneLog(); };
@@ -256,7 +262,7 @@ var row=cardB.parentElement;
         // cap the whole KPI area to a compact uniform height
         [...document.querySelectorAll('section.group\\/card')].forEach(function(c){
           var r=c.getBoundingClientRect();
-          if(r.top<260){ c.style.height='124px'; c.style.maxHeight='124px'; c.style.minHeight='0'; }
+          if(r.top<260){ c.style.height='152px'; c.style.maxHeight='152px'; c.style.minHeight='0'; }
         });
       }catch(e){}
     },320);
