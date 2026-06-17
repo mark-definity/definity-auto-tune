@@ -48,7 +48,7 @@
       b.onclick = function(){ show(t.id); };
       seg.appendChild(b);
       var f = document.createElement('iframe');
-      f.id = 'f-' + t.id; f.src = t.src; if (i!==0) f.className = 'hidden';
+      f.id = 'f-' + t.id; f.src = t.src + '?v=' + Date.now(); if (i!==0) f.className = 'hidden';
       stage.appendChild(f);
     });
     function show(id){
