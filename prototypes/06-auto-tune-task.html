@@ -78,3 +78,14 @@
   });
 })();
 </script>
+<script id="autotune-nav-links">
+(function(){
+  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  ready(function(){ setTimeout(function(){ try{
+    [...document.querySelectorAll('a[data-test-id="sidebar-navigation-item"]')].forEach(function(a){
+      if(a.__atwired) return; a.__atwired=true;
+      a.addEventListener('click', function(e){ e.preventDefault(); var n=(a.getAttribute('data-name')||'').toLowerCase(); var map={dashboard:'b-dash'}; try{ var id=map[n]; if(id && window.parent.document.getElementById(id)) window.parent.document.getElementById(id).click(); }catch(err){} });
+    });
+  }catch(e){} },260); });
+})();
+</script>

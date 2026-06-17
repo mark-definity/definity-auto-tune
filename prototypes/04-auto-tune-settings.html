@@ -110,6 +110,10 @@
         }
         clone.onclick=function(e){ e.preventDefault(); try{ window.parent.document.getElementById('b-autotune').click(); }catch(err){} };
         base.parentElement.insertBefore(clone, base.nextSibling);
+        [...document.querySelectorAll('a[data-test-id="sidebar-navigation-item"]')].forEach(function(a){
+          if(a.getAttribute('data-name')==='autotune-at' || a.__atwired) return; a.__atwired=true;
+          a.addEventListener('click', function(e){ e.preventDefault(); var n=(a.getAttribute('data-name')||'').toLowerCase(); var map={dashboard:'b-dash'}; try{ var id=map[n]; if(id && window.parent.document.getElementById(id)) window.parent.document.getElementById(id).click(); }catch(err){} });
+        });
       }catch(e){}
     },260);
   });
