@@ -65,10 +65,10 @@
       if(!srcChip||!nameCells.length) return;
       var statusMap=['tuning','tuning','off','eligible','tuning','off','eligible','off','off','tuning','off','eligible','off'];
       nameCells.forEach(function(c,i){
-        var st=statusMap[i]||'off'; if(st==='off') return;
+        var st=statusMap[i]||'off'; if(st!=='tuning') return;
         var chip=srcChip.cloneNode(true);
         var lbl=chip.querySelector('.MuiChip-label');
-        if(lbl) lbl.textContent = st==='tuning' ? 'Auto-Tuning' : 'AT eligible';
+        if(lbl) lbl.textContent = 'Auto-Tuning';
         chip.style.height='18px';
         chip.style.fontSize='11px';
         if(st==='tuning'){
@@ -242,7 +242,7 @@ var row=cardB.parentElement;
         var row=card.parentElement;
         function fill(c,title,sub,value,trend,opts){
           opts=opts||{};
-          var h2=c.querySelector('h2'); if(h2){ h2.innerHTML=(opts.icon?WAND:'')+title; if(opts.icon){ h2.style.display='flex'; h2.style.alignItems='center'; } }
+          var h2=c.querySelector('h2'); if(h2){ h2.innerHTML=(opts.icon?WAND:'')+title; if(opts.icon){ h2.style.display='flex'; h2.style.alignItems='flex-start'; h2.style.gap='5px'; } }
           var s2=c.querySelector('.typo-subtitle'); if(s2) s2.textContent=sub;
           var v=c.querySelector('[class*="fl-text"]'); if(v) v.textContent=value;
           var t=c.querySelector('[status]'); if(t){ t.removeAttribute('status'); t.innerHTML=trend||''; }
@@ -255,8 +255,8 @@ var row=cardB.parentElement;
         fill(card,'Savings opportunity','Annualized','$427K','<span style="font-size:0.75rem;color:var(--mui-palette-text-secondary);">&#8593; 73%</span>',{bg:'var(--mui-palette-primary-lightest)'});
         fill(atCard,'Auto-Tune saved','Last 30 days','$38K','<span style="font-size:0.75rem;font-weight:600;color:var(--mui-palette-primary-dark);">View log &#8594;</span>',{icon:true,bg:'var(--mui-palette-primary-lightest)',onclick:function(){ if(window.__openAutoTuneLog) window.__openAutoTuneLog(); }});
         fill(mCard,'Manual saved','Applied by you','$54K','',{bg:''});
-        row.insertBefore(atCard, card.nextSibling);
-        atCard.parentNode.insertBefore(mCard, atCard.nextSibling);
+        row.insertBefore(atCard, card);
+        row.insertBefore(mCard, card);
         var grand=row.parentElement;
         if(grand && grand.children.length>=2){ [...grand.children].forEach(function(g){ var n=g.querySelectorAll('section.group\\/card').length||1; g.style.flex=n+' 1 0%'; }); }
       }catch(e){}
@@ -293,6 +293,38 @@ var row=cardB.parentElement;
         base.parentElement.insertBefore(clone, base.nextSibling);
       }catch(e){}
     },260);
+  });
+})();
+</script>
+<script id="autotune-table-col">
+(function(){
+  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  ready(function(){
+    setTimeout(function(){
+      try{
+        if(document.getElementById('at-col-head')) return;
+        // 1) shrink the wide Compute(name) column so right columns are always visible
+        var nameHead=document.querySelector('[role="columnheader"][data-field="name"]');
+        if(nameHead) nameHead.style.width='280px';
+        document.querySelectorAll('.MuiDataGrid-cell[data-field="name"]').forEach(function(c){ c.style.setProperty('--width','280px'); c.style.width='280px'; });
+        // 2) add an Auto-Tuned Savings column (clone the opportunity column)
+        var oppHead=document.querySelector('[role="columnheader"][data-field="opportunity"]');
+        if(oppHead){
+          var nh=oppHead.cloneNode(true); nh.id='at-col-head'; nh.setAttribute('data-field','autotuned'); nh.setAttribute('aria-label','Auto-Tuned Savings'); nh.style.width='140px';
+          var tt=nh.querySelectorAll('.truncate'); if(tt[0]) tt[0].textContent='Auto-Tuned Savings'; if(tt[1]) tt[1].textContent='Annualized';
+          oppHead.insertAdjacentElement('afterend', nh);
+        }
+        var statusMap=['tuning','tuning','off','eligible','tuning','off','eligible','off','off','tuning','off','eligible','off'];
+        var vals=['$8.6K','$3.4K','—','—','$2.1K','—','—','—','—','$1.2K','—','—','—'];
+        var oppCells=[...document.querySelectorAll('.MuiDataGrid-cell[data-field="opportunity"]')];
+        oppCells.forEach(function(c,i){
+          var nc=c.cloneNode(true); nc.setAttribute('data-field','autotuned'); nc.style.setProperty('--width','140px'); nc.style.width='140px';
+          var tuned=statusMap[i]==='tuning';
+          nc.innerHTML='<span style="font-size:0.8rem;font-weight:'+(tuned?'600':'400')+';color:'+(tuned?'var(--mui-palette-primary-dark)':'#bbb')+';">'+(vals[i]||'—')+'</span>';
+          c.insertAdjacentElement('afterend', nc);
+        });
+      }catch(e){}
+    },300);
   });
 })();
 </script>

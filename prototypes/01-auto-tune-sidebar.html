@@ -31,6 +31,7 @@
       card.style.cssText='margin:14px 0;border-radius:8px;padding:12px;border:1px solid var(--mui-palette-primary-light);background:var(--mui-palette-primary-lightest);transition:all .2s;';
 
       function render(on){
+        try{ if(block) block.style.display = on ? 'none' : ''; }catch(e){}
         card.style.background = on ? 'var(--mui-palette-primary-lightest)' : 'transparent';
         card.style.borderColor = on ? 'var(--mui-palette-primary-light)' : 'rgba(0,0,0,0.15)';
         card.innerHTML =
