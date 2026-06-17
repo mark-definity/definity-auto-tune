@@ -46,11 +46,10 @@
       + '<div style="font-size:20px;font-weight:500;color:#292929;margin-bottom:6px;">Auto-Tune</div>'
       + '<div style="font-size:13px;color:#888;margin-bottom:18px;max-width:540px;">When enabled, Definity autonomously and iteratively tunes eligible pipelines and logs every action.</div>'
       + toggle('at-enable','Enable Auto-Tune','Automatically apply tuning to eligible insights.',true)
-      + sel('Tuning mode',['Conservative','Balanced','Aggressive'],'Balanced')
-      + field('Max change per run (%)','25')
-      + field('Require stable runs before next step','3')
-      + toggle('at-revert','Auto-revert on SLA regression','Roll back automatically if performance degrades.',true)
-      + field('Performance guardrail — max p95 latency increase (%)','5')
+      + sel('Mode',['Soft','Balanced','Aggressive'],'Balanced')
+      + field('Duration cap (%)','25')
+      + field('Exponential decay time window (days)','3')
+      + field('Executor suggestion min cap (%)','50')
       + '</div>';
   }
   function stub(name){ return '<div style="flex:1;display:flex;align-items:center;justify-content:center;color:#aaa;font-size:14px;">'+name+' settings</div>'; }
