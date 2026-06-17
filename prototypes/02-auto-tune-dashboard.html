@@ -226,3 +226,47 @@ var row=cardB.parentElement;
   });
 })();
 </script>
+<script id="autotune-combined-card">
+(function(){
+  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  var WAND='<svg viewBox="0 0 24 24" width="13" height="13" style="fill:currentColor;flex-shrink:0;"><path d="M7.5 5.6 10 7 8.6 4.5 10 2 7.5 3.4 5 2l1.4 2.5L5 7zm12 9.8L17 14l1.4 2.5L17 19l2.5-1.4L22 19l-1.4-2.5L22 14zM22 2l-2.5 1.4L17 2l1.4 2.5L17 7l2.5-1.4L22 7l-1.4-2.5zm-7.63 5.29c-.39-.39-1.02-.39-1.41 0L1.29 18.96c-.39.39-.39 1.02 0 1.41l2.34 2.34c.39.39 1.02.39 1.41 0L16.7 11.05c.39-.39.39-1.02 0-1.41zm-1.03 5.49-2.12-2.12 2.44-2.44 2.12 2.12z"></path></svg>';
+  ready(function(){
+    setTimeout(function(){
+      try{
+        if(document.getElementById('at-combined')) return;
+        function leaf(t){return [...document.querySelectorAll('*')].find(e=>e.textContent.trim()===t && e.children.length<=1);}
+        var conn=document.getElementById('at-connector'); if(conn) conn.remove();
+        var at=leaf('Auto-Tune saved'); var cardB=at; while(cardB && !(cardB.className&&String(cardB.className).includes('group/card'))) cardB=cardB.parentElement;
+        var sv=leaf('Savings oppt'); var cardA=sv; while(cardA && !(cardA.className&&String(cardA.className).includes('group/card'))) cardA=cardA.parentElement;
+        if(cardB) cardB.remove();
+        if(!cardA) return;
+        cardA.id='at-combined';
+        cardA.innerHTML=
+          '<div style="display:flex;flex-direction:column;height:100%;">'
+          +'<h2 class="text-sm color-primary">Savings opportunity</h2>'
+          +'<div class="typo-subtitle">Annualized</div>'
+          +'<div style="margin-top:8px;display:flex;align-items:baseline;gap:8px;">'
+            +'<span class="fl-text-lg/2xl font-bold leading-none">$427K</span>'
+            +'<span style="font-size:12px;color:var(--mui-palette-text-secondary);">&#8593; 73%</span>'
+          +'</div>'
+          +'<a id="at-combined-link" href="javascript:void(0)" style="margin-top:auto;padding-top:10px;border-top:1px solid rgba(0,0,0,0.1);text-decoration:none;display:block;">'
+            +'<div style="display:flex;align-items:center;justify-content:space-between;gap:6px;margin-bottom:5px;">'
+              +'<span style="display:flex;align-items:center;gap:5px;font-size:11px;font-weight:600;color:var(--mui-palette-primary-dark);">'+WAND+'Auto-Tune captured</span>'
+              +'<span style="font-size:11px;font-weight:600;color:var(--mui-palette-primary-dark);white-space:nowrap;">$38K · 9% &#8594;</span>'
+            +'</div>'
+            +'<div style="height:5px;border-radius:99px;background:rgba(15,110,86,0.16);overflow:hidden;"><div style="width:9%;height:100%;background:var(--mui-palette-primary-main);border-radius:99px;"></div></div>'
+          +'</a>'
+          +'</div>';
+        var lk=cardA.querySelector('#at-combined-link');
+        if(lk) lk.onclick=function(){ if(window.__openAutoTuneLog) window.__openAutoTuneLog(); };
+        var row=cardA.parentElement;
+        // cap the whole KPI area to a compact uniform height
+        [...document.querySelectorAll('section.group\\/card')].forEach(function(c){
+          var r=c.getBoundingClientRect();
+          if(r.top<260){ c.style.height='150px'; c.style.maxHeight='150px'; c.style.minHeight='0'; }
+        });
+      }catch(e){}
+    },320);
+  });
+})();
+</script>
