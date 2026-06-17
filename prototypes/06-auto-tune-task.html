@@ -42,7 +42,7 @@
           var svg=clone.querySelector('svg'); if(svg){ svg.setAttribute('viewBox','0 0 24 24'); svg.innerHTML='<path d="'+WP+'"></path>'; }
           // deselect the others
           [...group.querySelectorAll('button')].forEach(function(b){ b.classList.remove('Mui-selected'); b.setAttribute('aria-pressed','false'); });
-          group.insertBefore(clone, first);
+          first.parentNode.insertBefore(clone, first.nextSibling);
           clone.onclick=function(){ showLog(); };
         }
         // 2) Auto-Tune log in the right panel
