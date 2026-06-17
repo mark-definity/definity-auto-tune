@@ -242,19 +242,21 @@ var row=cardB.parentElement;
         var row=card.parentElement;
         function fill(c,title,sub,value,trend,opts){
           opts=opts||{};
-          var h2=c.querySelector('h2'); if(h2){ h2.innerHTML=(opts.icon?WAND:'')+title; if(opts.icon){ h2.style.display='flex'; h2.style.alignItems='flex-start'; h2.style.gap='5px'; } }
+          var h2=c.querySelector('h2'); if(h2){ h2.textContent=title; }
           var s2=c.querySelector('.typo-subtitle'); if(s2) s2.textContent=sub;
           var v=c.querySelector('[class*="fl-text"]'); if(v) v.textContent=value;
           var t=c.querySelector('[status]'); if(t){ t.removeAttribute('status'); t.innerHTML=trend||''; }
-          c.style.backgroundColor=('bg' in opts)?opts.bg:'';
+          if(opts.white){ c.classList.remove('bg-success-lightest','dark:bg-success-dark'); c.style.backgroundColor=''; }
+          else if('bg' in opts){ c.style.backgroundColor=opts.bg; }
+          if(opts.icon){ var ic=document.createElement('div'); ic.style.cssText='position:absolute;top:12px;right:12px;color:var(--mui-palette-primary-main);line-height:0;'; ic.innerHTML=WAND; c.appendChild(ic); }
           if(opts.onclick){ c.onclick=opts.onclick; } else { c.style.cursor='default'; }
         }
         var atCard=card.cloneNode(true); atCard.id='at-saved';
         var mCard=card.cloneNode(true); mCard.id='at-manual';
         card.id='at-savings';
         fill(card,'Savings opportunity','Annualized','$427K','<span style="font-size:0.75rem;color:var(--mui-palette-text-secondary);">&#8593; 73%</span>',{bg:'var(--mui-palette-primary-lightest)'});
-        fill(atCard,'Auto-Tune saved','Last 30 days','$38K','<span style="font-size:0.75rem;font-weight:600;color:var(--mui-palette-primary-dark);">View log &#8594;</span>',{icon:true,bg:'var(--mui-palette-primary-lightest)',onclick:function(){ if(window.__openAutoTuneLog) window.__openAutoTuneLog(); }});
-        fill(mCard,'Manual saved','Applied by you','$54K','',{bg:''});
+        fill(atCard,'Auto-Tune saved','Last 30 days','$38K','<span style="font-size:0.75rem;font-weight:600;color:var(--mui-palette-primary-dark);">View log &#8594;</span>',{icon:true,white:true,onclick:function(){ if(window.__openAutoTuneLog) window.__openAutoTuneLog(); }});
+        fill(mCard,'Manual saved','Applied by you','$54K','',{white:true});
         row.insertBefore(atCard, card);
         row.insertBefore(mCard, card);
         var grand=row.parentElement;
@@ -312,7 +314,7 @@ var row=cardB.parentElement;
         if(oppHead){
           var nh=oppHead.cloneNode(true); nh.id='at-col-head'; nh.setAttribute('data-field','autotuned'); nh.setAttribute('aria-label','Auto-Tuned Savings'); nh.style.width='140px';
           var tt=nh.querySelectorAll('.truncate'); if(tt[0]) tt[0].textContent='Auto-Tuned Savings'; if(tt[1]) tt[1].textContent='Annualized';
-          oppHead.insertAdjacentElement('afterend', nh);
+          oppHead.insertAdjacentElement('beforebegin', nh);
         }
         var statusMap=['tuning','tuning','off','eligible','tuning','off','eligible','off','off','tuning','off','eligible','off'];
         var vals=['$8.6K','$3.4K','—','—','$2.1K','—','—','—','—','$1.2K','—','—','—'];
@@ -321,7 +323,7 @@ var row=cardB.parentElement;
           var nc=c.cloneNode(true); nc.setAttribute('data-field','autotuned'); nc.style.setProperty('--width','140px'); nc.style.width='140px';
           var tuned=statusMap[i]==='tuning';
           nc.innerHTML='<span style="font-size:0.8rem;font-weight:'+(tuned?'600':'400')+';color:'+(tuned?'var(--mui-palette-primary-dark)':'#bbb')+';">'+(vals[i]||'—')+'</span>';
-          c.insertAdjacentElement('afterend', nc);
+          c.insertAdjacentElement('beforebegin', nc);
         });
       }catch(e){}
     },300);
