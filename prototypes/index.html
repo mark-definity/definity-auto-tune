@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Definity · Auto-Tune Prototypes</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body { font-family: 'Inter', sans-serif; background: #f5f7f8; display: flex; flex-direction: column; overflow: hidden; }
+  .bar {
+    height: 50px; flex-shrink: 0; background: #854d0e; border-bottom: 2px solid #422006;
+    display: flex; align-items: center; gap: 16px; padding: 0 16px;
+  }
+  .brand { font-weight: 700; color: #fde68a; font-size: 15px; letter-spacing: -0.3px; }
+  .sub { font-size: 12px; color: #e6c068; }
+  .seg { margin-left: auto; display: inline-flex; background: rgba(0,0,0,0.22); border-radius: 8px; padding: 3px; gap: 2px; }
+  .seg button {
+    border: 0; background: transparent; font-family: inherit; font-size: 13px; font-weight: 500;
+    color: #fde68a; padding: 6px 14px; border-radius: 6px; cursor: pointer; transition: all .15s;
+  }
+  .seg button.active { background: #fde68a; color: #422006; box-shadow: 0 1px 2px rgba(0,0,0,0.3); font-weight: 600; }
+  .stage { flex: 1; position: relative; }
+  iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; background: #f5f7f8; }
+  iframe.hidden { display: none; }
+</style>
+</head>
+<body>
+  <div class="bar">
+    <span class="brand">definity</span>
+    <span class="sub">Auto-Tune prototypes · light mode</span>
+    <div class="seg" id="seg"></div>
+  </div>
+  <div class="stage" id="stage"></div>
+  <script>
+    var TABS = [
+      { id:'dash',     label:'Dashboard',     src:'02-auto-tune-dashboard.html' },
+      { id:'insight',  label:'Insight panel', src:'01-auto-tune-sidebar.html' },
+      { id:'run',      label:'Run log',       src:'03-auto-tune-run-detail.html' },
+      { id:'autotune', label:'Auto-Tune',     src:'05-auto-tune-page.html' },
+      { id:'settings', label:'Settings',      src:'04-auto-tune-settings.html' },
+    ];
+    var seg = document.getElementById('seg'), stage = document.getElementById('stage');
+    TABS.forEach(function(t, i){
+      var b = document.createElement('button');
+      b.textContent = t.label; b.id = 'b-' + t.id; if (i===0) b.className = 'active';
+      b.onclick = function(){ show(t.id); };
+      seg.appendChild(b);
+      var f = document.createElement('iframe');
+      f.id = 'f-' + t.id; f.src = t.src; if (i!==0) f.className = 'hidden';
+      stage.appendChild(f);
+    });
+    function show(id){
+      TABS.forEach(function(t){
+        document.getElementById('f-' + t.id).classList.toggle('hidden', t.id !== id);
+        document.getElementById('b-' + t.id).classList.toggle('active', t.id === id);
+      });
+    }
+  </script>
+</body>
+</html>
