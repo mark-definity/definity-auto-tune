@@ -199,18 +199,30 @@
         var link=document.getElementById('at-log-link');
         var bar=document.createElement('div');
         bar.id='at-progress';
-        bar.style.cssText='margin-top:12px;';
+        bar.style.cssText='margin-top:8px;';
         bar.innerHTML=
-          '<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:5px;">'
-            +'<span style="font-size:11px;color:var(--mui-palette-text-secondary);">Captured of $427K opportunity</span>'
-            +'<span style="font-size:11px;font-weight:600;color:var(--mui-palette-primary-dark);">9%</span>'
-          +'</div>'
-          +'<div style="height:6px;border-radius:99px;background:rgba(15,110,86,0.14);overflow:hidden;">'
-            +'<div style="width:9%;height:100%;background:var(--mui-palette-primary-main);border-radius:99px;"></div>'
-          +'</div>';
+          '<div style="font-size:11px;color:var(--mui-palette-text-secondary);margin-bottom:3px;"><span style="font-weight:600;color:var(--mui-palette-primary-dark);">9%</span> of $427K opportunity</div>'
+          +'<div style="height:5px;border-radius:99px;background:rgba(15,110,86,0.14);overflow:hidden;"><div style="width:9%;height:100%;background:var(--mui-palette-primary-main);border-radius:99px;"></div></div>';
+var pp=[...cardB.querySelectorAll('*')].find(function(e){return e.children.length===0 && e.textContent.trim()==='12 pipelines';}); if(pp) pp.style.display='none';
         if(link) cardB.insertBefore(bar, link); else cardB.appendChild(bar);
       }catch(e){}
     },180);
+  });
+})();
+</script>
+<script id="autotune-kpi-height">
+(function(){
+  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  ready(function(){
+    setTimeout(function(){
+      try{
+        function leaf(t){return [...document.querySelectorAll('*')].find(e=>e.textContent.trim()===t && e.children.length<=1);}
+        var at=leaf('Auto-Tune saved'); var cardB=at; while(cardB && !(cardB.className&&String(cardB.className).includes('group/card'))) cardB=cardB.parentElement;
+        if(!cardB) return;
+var row=cardB.parentElement;
+        [...row.children].forEach(function(c){ if(c.className && String(c.className).includes('group/card')){ c.style.height='188px'; c.style.maxHeight='188px'; c.style.minHeight='0'; } });
+      }catch(e){}
+    },220);
   });
 })();
 </script>
