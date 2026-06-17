@@ -249,9 +249,11 @@ var row=cardB.parentElement;
         atCard.innerHTML=body(WAND+'Auto-Tune saved','Last 30 days','$38K','<div style="font-size:11px;font-weight:600;color:var(--mui-palette-primary-dark);margin-top:5px;">View log &#8594;</div>');
         atCard.onclick=function(){ if(window.__openAutoTuneLog) window.__openAutoTuneLog(); };
         var mCard=cardA.cloneNode(false); mCard.id='at-manual'; mCard.className=cls; mCard.style.backgroundColor=''; mCard.style.cursor='default';
-        mCard.innerHTML=body('Manual opportunities','Applied by you','$54K','');
+        mCard.innerHTML=body('Manual opportunities','Savings you applied yourself','$54K','');
         cardA.parentNode.insertBefore(atCard, cardA.nextSibling);
         atCard.parentNode.insertBefore(mCard, atCard.nextSibling);
+        var grand=row.parentElement;
+        if(grand && grand.children.length>=2){ [...grand.children].forEach(function(g){ var n=g.querySelectorAll('section.group\\/card').length||1; g.style.flex=n+' 1 0%'; }); }
         [...document.querySelectorAll('section.group\\/card')].forEach(function(c){
           var r=c.getBoundingClientRect();
           if(r.top<260){ c.style.height='150px'; c.style.maxHeight='150px'; c.style.minHeight='0'; }
