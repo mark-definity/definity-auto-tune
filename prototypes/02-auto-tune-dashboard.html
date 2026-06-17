@@ -255,7 +255,7 @@ var row=cardB.parentElement;
         var mCard=card.cloneNode(true); mCard.id='at-manual';
         card.id='at-savings';
         fill(card,'Savings opportunity','Annualized','$427K','<span style="font-size:0.75rem;color:var(--mui-palette-text-secondary);">&#8593; 73%</span>',{bg:'var(--mui-palette-primary-lightest)'});
-        fill(atCard,'Auto-Tune saved','Last 30 days','$38K','<span style="font-size:0.75rem;font-weight:600;color:var(--mui-palette-primary-dark);">View log &#8594;</span>',{icon:true,white:true,onclick:function(){ if(window.__openAutoTuneLog) window.__openAutoTuneLog(); }});
+        fill(atCard,'Auto-Tune saved','Last 30 days','$38K','<span style="font-size:0.75rem;font-weight:600;color:var(--mui-palette-primary-dark);">View log &#8594;</span>',{white:true,onclick:function(){ if(window.__openAutoTuneLog) window.__openAutoTuneLog(); }});
         fill(mCard,'Manual saved','Applied by you','$54K','',{white:true});
         row.insertBefore(atCard, card);
         row.insertBefore(mCard, card);
