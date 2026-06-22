@@ -47,11 +47,10 @@
         }
         // 2) Auto-Tune log in the right panel
         function leaf(t){return [...document.querySelectorAll('*')].find(e=>e.textContent.trim()===t && e.children.length<=1);}
-        var ti=leaf('Task insights');
-        var panel=ti?ti.parentElement:null;
         function showLog(){
-          if(!panel) return;
-          if(document.getElementById('at-task-log')){ document.getElementById('at-task-log').scrollIntoView(); return; }
+          var ti=leaf('Task insights'); var panel=ti?ti.parentElement:null;
+          if(!panel) return false;
+          if(document.getElementById('at-task-log')){ document.getElementById('at-task-log').scrollIntoView(); return true; }
           var rows=LOG.map(function(e){var m=TYPES[e.t];
             return '<div style="display:flex;gap:10px;padding:12px 0;border-bottom:1px solid rgba(0,0,0,0.07);">'
               +'<div style="flex-shrink:0;width:24px;height:24px;border-radius:50%;background:'+m.bg+';color:'+m.c+';display:flex;align-items:center;justify-content:center;"><svg viewBox="0 0 512 512" width="13" height="13" style="fill:currentColor;">'+WP+'</svg></div>'
@@ -63,16 +62,18 @@
           box.id='at-task-log';
           box.style.cssText='margin-bottom:18px;';
           box.innerHTML=
-            '<div style="display:flex;align-items:center;gap:7px;margin-bottom:2px;"><span style="color:var(--mui-palette-primary-main);">'+WAND+'</span><span style="font-size:15px;font-weight:600;color:#292929;">Auto-Tune</span></div>'
+            '<div style="display:flex;align-items:center;gap:7px;margin-bottom:2px;"><span style="color:var(--mui-palette-primary-main);">'+WAND+'</span><span style="font-size:15px;font-weight:600;color:#292929;">Auto-Tune</span><button id="at-task-close" aria-label="Close" style="margin-left:auto;border:0;background:transparent;font-size:20px;line-height:1;color:#858585;cursor:pointer;padding:0 2px;">&times;</button></div>'
             +'<div style="font-size:12px;color:#888;margin-bottom:8px;">Per-run impact for this task</div>'
             +'<div style="display:flex;gap:10px;padding:8px 0 12px;border-bottom:1px solid rgba(0,0,0,0.08);margin-bottom:4px;">'
-              +'<div><div style="font-size:16px;font-weight:700;color:var(--mui-palette-primary-dark);">$9.4K</div><div style="font-size:10px;color:#888;">saved · 30d</div></div>'
+              +'<div><div style="font-size:16px;font-weight:700;color:var(--mui-palette-primary-dark);">$9.4K</div><div style="font-size:10px;color:#888;">saved · 1 year</div></div>'
               +'<div style="margin-left:auto;text-align:right;"><div style="font-size:16px;font-weight:700;color:#292929;">'+LOG.length+'</div><div style="font-size:10px;color:#888;">actions</div></div>'
             +'</div>'
             + rows;
           panel.insertBefore(box, panel.firstChild);
+          var cl=box.querySelector('#at-task-close'); if(cl) cl.onclick=function(){ box.remove(); };
+          return true;
         }
-        showLog();
+        var tries=0; (function attempt(){ if(showLog()) return; if(tries++<25) setTimeout(attempt,150); })();
       }catch(e){}
     },240);
   });
