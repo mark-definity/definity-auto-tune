@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Auto-Tune · Compute</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: 'Inter', system-ui, sans-serif;
+    background: oklch(0.98 0.001 200);
+    color: #292929;
+    display: flex; align-items: center; justify-content: center;
+    padding: 24px;
+  }
+  .empty { display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 420px; gap: 16px; }
+  .badge { width: 56px; height: 56px; border-radius: 50%; background: oklch(0.9 0.04 175); display: flex; align-items: center; justify-content: center; color: oklch(0.53 0.09 195); }
+  h1 { font-size: 20px; font-weight: 600; letter-spacing: -0.2px; }
+  p { font-size: 14px; line-height: 1.5; color: #858585; }
+  .chip { margin-top: 4px; font-size: 12px; font-weight: 600; color: oklch(0.53 0.09 195); background: oklch(0.9 0.04 175); padding: 4px 12px; border-radius: 999px; }
+</style>
+</head>
+<body>
+  <div class="empty">
+    <div class="badge">
+      <svg viewBox="0 0 512 512" width="26" height="26" style="fill:currentColor;">
+        <path d="m507.392 429.507-187.038-187.036a5.63 5.63 0 0 1 -1.577-4.88l6.267-38.779a30.766 30.766 0 0 0 -8.595-26.6l-59.4-59.4a30.834 30.834 0 0 0 -29.176-8.063l-40.451 10.159a12.459 12.459 0 0 0 -5.775 20.893l42.462 42.462-5.575 39.521-39.522 5.576-42.465-42.46a12.459 12.459 0 0 0 -20.893 5.775l-10.154 40.447a30.838 30.838 0 0 0 8.063 29.177l59.4 59.4a30.761 30.761 0 0 0 26.6 8.594l38.78-6.267a5.639 5.639 0 0 1 4.877 1.577l188.719 188.727a12.531 12.531 0 0 0 17.719 0c4.876-4.875 4.613-13.111-.263-17.986z"></path>
+      </svg>
+    </div>
+    <h1>Auto-Tune · Compute</h1>
+    <p>This view isn't available yet. Compute-level Auto-Tune needs access to the compute environment, which is still pending.</p>
+    <span class="chip">Access pending</span>
+  </div>
+</body>
+</html>

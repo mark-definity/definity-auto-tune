@@ -48,7 +48,8 @@
         // 2) Auto-Tune log in the right panel
         function leaf(t){return [...document.querySelectorAll('*')].find(e=>e.textContent.trim()===t && e.children.length<=1);}
         function showLog(){
-          var ti=leaf('Task insights'); var panel=ti?ti.parentElement:null;
+          var atList=document.querySelector('.basic-expandable-list');
+          var panel=atList?atList.parentElement:(function(){var ti=leaf('Task insights');return ti?ti.closest('div'):null;})();
           if(!panel) return false;
           if(document.getElementById('at-task-log')){ document.getElementById('at-task-log').scrollIntoView(); return true; }
           var rows=LOG.map(function(e){var m=TYPES[e.t];
@@ -70,7 +71,17 @@
             +'</div>'
             + rows;
           panel.insertBefore(box, panel.firstChild);
-          var cl=box.querySelector('#at-task-close'); if(cl) cl.onclick=function(){ box.remove(); };
+          var grp=document.querySelector('[data-test-id="toolbox-buttons"]');
+          var allBtns=grp?[...grp.querySelectorAll('button')]:[];
+          function selectBtn(btn){ allBtns.forEach(function(b){ b.classList.remove('Mui-selected'); b.setAttribute('aria-pressed','false'); }); if(btn){ btn.classList.add('Mui-selected'); btn.setAttribute('aria-pressed','true'); } }
+          function setPanel(atOn){ box.style.display=atOn?'':'none'; [...panel.children].forEach(function(ch){ if(ch!==box) ch.style.display=atOn?'none':''; }); }
+          var contentWrap=(function(){var el=panel; while(el && el.parentElement && el.parentElement.tagName!=='ASIDE') el=el.parentElement; return el;})();
+          function openPanel(show){ if(contentWrap) contentWrap.style.display=show?'':'none'; }
+          var wand=document.getElementById('at-rail-btn');
+          if(wand) wand.onclick=function(){ openPanel(true); selectBtn(wand); setPanel(true); };
+          allBtns.forEach(function(b){ if(b.id!=='at-rail-btn'){ b.addEventListener('click',function(){ openPanel(true); selectBtn(b); setPanel(false); }); } });
+          var cl=box.querySelector('#at-task-close'); if(cl) cl.onclick=function(){ openPanel(false); selectBtn(null); };
+          selectBtn(wand); setPanel(true);
           return true;
         }
         var tries=0; (function attempt(){ if(showLog()) return; if(tries++<25) setTimeout(attempt,150); })();
@@ -88,5 +99,34 @@
       a.addEventListener('click', function(e){ e.preventDefault(); var n=(a.getAttribute('data-name')||'').toLowerCase(); var map={dashboard:'b-dash'}; try{ var id=map[n]; if(id && window.parent.document.getElementById(id)) window.parent.document.getElementById(id).click(); }catch(err){} });
     });
   }catch(e){} },260); });
+})();
+</script>
+
+<script id="autotune-sidebar-toggle">
+(function(){
+  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  ready(function(){
+    function run(){
+      var sb=document.querySelector('.sidebar'); if(!sb || sb.getAttribute('data-at-toggle')) return;
+      var icon=sb.querySelector('[data-test-id="arrow-forward-icon"]');
+      var toggle=icon?icon.closest('.cursor-pointer'):null;
+      if(!toggle) return;
+      sb.setAttribute('data-at-toggle','1');
+      var COLLAPSED=Math.round(sb.getBoundingClientRect().width)||53, EXPANDED=220;
+      sb.style.transition='width 200ms cubic-bezier(0.4,0,0.2,1)';
+      if(icon) icon.style.transition='transform 200ms cubic-bezier(0.4,0,0.2,1)';
+      var labels=[...sb.querySelectorAll('[data-test-id="sidebar-navigation-item"] span')];
+      labels.forEach(function(l){ l.style.transition='opacity 160ms ease'; });
+      var open=false;
+      function render(){
+        sb.style.width=(open?EXPANDED:COLLAPSED)+'px';
+        if(icon) icon.style.transform=open?'rotate(180deg)':'rotate(0deg)';
+        labels.forEach(function(l){ l.style.opacity=open?'1':'0'; l.style.marginLeft=open?'8px':''; });
+      }
+      render();
+      toggle.addEventListener('click', function(e){ e.stopPropagation(); open=!open; render(); });
+    }
+    setTimeout(run,700); setTimeout(run,1600);
+  });
 })();
 </script>

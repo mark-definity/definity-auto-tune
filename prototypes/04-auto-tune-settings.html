@@ -47,7 +47,7 @@
       + '<div style="font-size:13px;color:#888;margin-bottom:18px;max-width:540px;">When enabled, Definity autonomously and iteratively tunes eligible pipelines and logs every action.</div>'
       + toggle('at-enable','Enable Auto-Tune','Automatically apply tuning to eligible insights.',true)
       + '<div id="at-fields" style="transition:opacity .2s;">'
-      + sel('Mode',['Soft','Balanced','Aggressive'],'Balanced')
+      + sel('Mode',['Soft · ≤10% cap','Balanced · ≤25% cap','Aggressive · ≤50% cap'],'Balanced · ≤25% cap')
       + field('Duration cap (%)','25')
       + field('Exponential decay time window (days)','3')
       + field('Executor suggestion min cap (%)','50')
@@ -116,6 +116,445 @@
         });
       }catch(e){}
     },260);
+  });
+})();
+</script>
+<script id="autotune-combined-card">
+(function(){
+  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  var WAND='<svg viewBox="0 0 512 512" width="11" height="11" style="fill:currentColor;flex-shrink:0;margin-right:2px;vertical-align:middle;"><path d="m507.392 429.507-187.038-187.036a5.63 5.63 0 0 1 -1.577-4.88l6.267-38.779a30.766 30.766 0 0 0 -8.595-26.6l-59.4-59.4a30.834 30.834 0 0 0 -29.176-8.063l-40.451 10.159a12.459 12.459 0 0 0 -5.775 20.893l42.462 42.462-5.575 39.521-39.522 5.576-42.465-42.46a12.459 12.459 0 0 0 -20.893 5.775l-10.154 40.447a30.838 30.838 0 0 0 8.063 29.177l59.4 59.4a30.761 30.761 0 0 0 26.6 8.594l38.78-6.267a5.639 5.639 0 0 1 4.877 1.577l188.719 188.727a12.531 12.531 0 0 0 17.719 0c4.876-4.875 4.613-13.111-.263-17.986l-188.458-188.457a30.755 30.755 0 0 0 -26.6-8.6l-38.78 6.267a5.648 5.648 0 0 1 -4.878-1.576l-59.4-59.4a5.66 5.66 0 0 1 -1.48-5.351l4.745-18.892 32.356 32.359a9.152 9.152 0 0 0 7.746 2.589l62.139-8.766a5.265 5.265 0 0 0 4.477-4.477l8.768-62.14a9.149 9.149 0 0 0 -2.589-7.745l-32.36-32.36 18.893-4.745a5.655 5.655 0 0 1 5.35 1.479l59.4 59.405a5.628 5.628 0 0 1 1.576 4.877l-6.267 38.779a30.765 30.765 0 0 0 8.595 26.6l187.338 187.332a12.531 12.531 0 0 0 17.886-.169 12.8 12.8 0 0 0 -.46-17.846z" fill="currentColor"></path></svg>';
+
+  ready(function(){
+    setTimeout(function(){
+      try{
+        if(document.getElementById('at-savings-group')) return;
+        function leaf(t){return [...document.querySelectorAll('*')].find(e=>e.textContent.trim()===t&&e.children.length<=1);}
+        var conn=document.getElementById('at-connector'); if(conn) conn.remove();
+        var stray=leaf('Auto-Tune saved'); if(stray){ var sc=stray; while(sc && !(sc.className&&String(sc.className).includes('group/card'))) sc=sc.parentElement; if(sc) sc.remove(); }
+        var sv=leaf('Savings oppt'); var card=sv; while(card && !(card.className&&String(card.className).includes('group/card'))) card=card.parentElement;
+        if(!card) return;
+        var row=card.parentElement;
+
+        // Measure sibling card to get exact offsets
+        var sib=row.children[0];
+        var sibR=sib.getBoundingClientRect();
+        var numDiv=[...sib.querySelectorAll('div')].find(function(d){return d.children.length===0&&/^\d+$/.test(d.textContent.trim());});
+        var numOffset=numDiv ? Math.round(numDiv.getBoundingClientRect().top - sibR.top) : 73;
+        var sibPad=parseInt(window.getComputedStyle(sib).paddingTop)||16;
+
+        var metrics = [
+          { title:'Auto-Tune saved', sub:'Last 30 days',  value:'$38K',  trend:'<span style="display:inline-flex;align-items:center;font-size:11px;font-weight:600;color:var(--mui-palette-primary-dark);">View log →</span>' },
+          { title:'Manual saved',    sub:'Applied by you',value:'$54K',  trend:'' },
+          { title:'Savings oppt',    sub:'Annualized',     value:'$427K', trend:'<span style="font-size:11px;color:var(--mui-palette-text-secondary);">↑ 73%</span>' }
+        ];
+
+        var group = document.createElement('div');
+        group.id = 'at-savings-group';
+        group.className = card.className;
+        group.classList.remove('bg-success-lightest','dark:bg-success-dark');
+        group.style.cssText = 'display:flex;flex-direction:row;align-items:stretch;background:var(--mui-palette-primary-lightest);padding:0;overflow:hidden;cursor:default;flex:1 1 0%;min-width:0;box-sizing:border-box;';
+
+        // Sibling title element for reference height
+        var sibH2 = sib.querySelector('h2');
+        var sibSubEl = sibH2 ? sibH2.nextElementSibling : null;
+        var titleH = sibH2 ? Math.round(sibH2.getBoundingClientRect().height) : 20;
+        var subH = sibSubEl ? Math.round(sibSubEl.getBoundingClientRect().height) : 16;
+        // Gap between subtitle bottom and value top in sibling
+        var subBottom = sibSubEl ? Math.round(sibSubEl.getBoundingClientRect().top - sibR.top + subH) : 53;
+        var valueMargin = numOffset - subBottom; // px gap between subtitle and value
+
+        metrics.forEach(function(m, i){
+          if(i > 0){
+            var dv = document.createElement('div');
+            dv.style.cssText = 'width:1px;background:var(--mui-palette-divider);align-self:stretch;flex-shrink:0;margin:12px 0;';
+            group.appendChild(dv);
+          }
+          var cell = document.createElement('div');
+          cell.style.cssText = 'flex:1 1 0%;min-width:0;padding:'+sibPad+'px;display:flex;flex-direction:column;justify-content:flex-start;box-sizing:border-box;';
+
+          // Title: single line, same height as sibling h2
+          var titleDiv = document.createElement('div');
+          titleDiv.className='text-sm color-primary';
+          titleDiv.style.cssText = 'height:34px;line-height:17px;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;';
+          titleDiv.textContent = m.title;
+
+          // Subtitle
+          var subDiv = document.createElement('div');
+          subDiv.className='typo-subtitle';
+          subDiv.style.cssText = 'white-space:nowrap;height:16px;line-height:16px;margin-top:2px;';
+          subDiv.textContent = m.sub;
+
+          // Value — fixed margin to match sibling exactly
+          var valDiv = document.createElement('div');
+          valDiv.className='fl-text-lg/2xl font-bold leading-none whitespace-nowrap';
+          valDiv.style.cssText = 'color:var(--mui-palette-text-primary);margin-top:5px;';
+          valDiv.textContent = m.value;
+
+          // Trend
+          var trendDiv = document.createElement('div');
+          trendDiv.style.cssText = 'min-height:16px;margin-top:6px;line-height:1;';
+          trendDiv.innerHTML = m.trend;
+
+          cell.appendChild(titleDiv);
+          cell.appendChild(subDiv);
+          cell.appendChild(valDiv);
+          cell.appendChild(trendDiv);
+          group.appendChild(cell);
+        });
+
+        row.replaceChild(group, card);
+
+        [...row.children].forEach(function(c){
+          if(c.id !== 'at-savings-group'){
+            c.style.flex = '0 0 110px';
+            c.style.width = '110px';
+            c.style.minWidth = '0';
+            c.style.overflow = 'hidden';
+          }
+        });
+
+      }catch(e){ console.error('at-combined',e); }
+    },320);
+  });
+})();
+</script>
+
+<script id="autotune-table-col">
+(function(){
+  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  ready(function(){
+    try{
+      var nameCells=[...document.querySelectorAll('.MuiDataGrid-cell[data-field="name"]')];
+      var srcChip=document.querySelector('.MuiDataGrid-cell[data-field="utilization"] .MuiChip-root');
+      if(!srcChip||!nameCells.length) return;
+      var statusMap=['tuning','tuning','off','eligible','tuning','off','eligible','off','off','tuning','off','eligible','off'];
+      nameCells.forEach(function(c,i){
+        var st=statusMap[i]||'off'; if(st!=='tuning') return;
+        var chip=srcChip.cloneNode(true);
+        var lbl=chip.querySelector('.MuiChip-label');
+        if(lbl) lbl.textContent = 'Auto-Tuning';
+        chip.style.height='18px';
+        chip.style.fontSize='11px';
+        if(st==='tuning'){
+          chip.style.backgroundColor='var(--mui-palette-primary-lightest)';
+          chip.style.color='var(--mui-palette-primary-dark)';
+        } else {
+          chip.style.backgroundColor='transparent';
+          chip.style.border='1px solid rgba(0,0,0,0.18)';
+          chip.style.color='#666';
+        }
+        chip.style.display='inline-flex';
+        chip.style.verticalAlign='middle';
+        chip.style.marginLeft='8px';
+        var box=c.querySelector('.leading-5')||c;
+        var nameLink=box.querySelector('a');
+        if(nameLink){ nameLink.insertAdjacentElement('afterend', chip); } else { box.appendChild(chip); }
+      });
+    }catch(e){}
+  });
+})();
+</script>
+<script id="autotune-log-system">
+(function(){
+  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  var WAND='<svg viewBox="0 0 512 512" width="14" height="14" style="fill:currentColor;"><path d="m507.392 429.507-187.038-187.036a5.63 5.63 0 0 1 -1.577-4.88l6.267-38.779a30.766 30.766 0 0 0 -8.595-26.6l-59.4-59.4a30.834 30.834 0 0 0 -29.176-8.063l-40.451 10.159a12.459 12.459 0 0 0 -5.775 20.893l42.462 42.462-5.575 39.521-39.522 5.576-42.465-42.46a12.459 12.459 0 0 0 -20.893 5.775l-10.154 40.447a30.838 30.838 0 0 0 8.063 29.177l59.4 59.4a30.761 30.761 0 0 0 26.6 8.594l38.78-6.267a5.639 5.639 0 0 1 4.877 1.577l188.719 188.727a12.531 12.531 0 0 0 17.719 0c4.876-4.875 4.613-13.111-.263-17.986l-188.458-188.457a30.755 30.755 0 0 0 -26.6-8.6l-38.78 6.267a5.648 5.648 0 0 1 -4.878-1.576l-59.4-59.4a5.66 5.66 0 0 1 -1.48-5.351l4.745-18.892 32.356 32.359a9.152 9.152 0 0 0 7.746 2.589l62.139-8.766a5.265 5.265 0 0 0 4.477-4.477l8.768-62.14a9.149 9.149 0 0 0 -2.589-7.745l-32.36-32.36 18.893-4.745a5.655 5.655 0 0 1 5.35 1.479l59.4 59.405a5.628 5.628 0 0 1 1.576 4.877l-6.267 38.779a30.765 30.765 0 0 0 8.595 26.6l187.338 187.332a12.531 12.531 0 0 0 17.886-.169 12.8 12.8 0 0 0 -.46-17.846z" fill="currentColor"></path><path d="m254.6 373.865a12.528 12.528 0 0 0 -11.185-3.99 152.757 152.757 0 0 1 -45.991 0 12.528 12.528 0 0 0 -11.185 3.99l-34.721 38.459c-6.322-2.258-12.54-4.83-18.6-7.7l2.643-51.731a12.527 12.527 0 0 0 -5.084-10.728 153.805 153.805 0 0 1 -32.552-32.551 12.526 12.526 0 0 0 -10.728-5.083l-51.737 2.645c-2.865-6.061-5.439-12.28-7.695-18.6l38.458-34.72a12.53 12.53 0 0 0 3.99-11.186 152.666 152.666 0 0 1 0-45.992 12.528 12.528 0 0 0 -3.99-11.186l-38.457-34.72c2.256-6.323 4.83-12.542 7.7-18.6l51.729 2.643a12.529 12.529 0 0 0 10.728-5.083 153.805 153.805 0 0 1 32.547-32.559 12.527 12.527 0 0 0 5.084-10.728l-2.643-51.731c6.062-2.866 12.28-5.439 18.6-7.695l34.72 38.458a12.529 12.529 0 0 0 11.186 3.99 152.712 152.712 0 0 1 45.994 0 12.529 12.529 0 0 0 11.186-3.99l34.72-38.458c6.322 2.256 12.541 4.83 18.6 7.7l-2.643 51.73a12.527 12.527 0 0 0 5.084 10.728 153.779 153.779 0 0 1 32.552 32.552 12.529 12.529 0 0 0 10.728 5.083l51.73-2.643c2.865 6.063 5.438 12.28 7.695 18.6l-38.458 34.72a12.529 12.529 0 0 0 -3.99 11.186 152.705 152.705 0 0 1 0 45.993 12.53 12.53 0 0 0 3.99 11.186l44.547 40.219a12.532 12.532 0 0 0 17.853-1.079 12.8 12.8 0 0 0 -1.368-17.8l-39.337-35.528a177.555 177.555 0 0 0 0-39.991l39.659-35.805a12.528 12.528 0 0 0 3.559-13.046 228.9 228.9 0 0 0 -15.469-37.389 12.528 12.528 0 0 0 -11.745-6.714l-53.358 2.725a178.834 178.834 0 0 0 -28.3-28.3l2.725-53.357a12.528 12.528 0 0 0 -6.713-11.745 228.873 228.873 0 0 0 -37.393-15.47 12.528 12.528 0 0 0 -13.046 3.559l-35.805 39.66a177.563 177.563 0 0 0 -39.992 0l-35.8-39.659a12.527 12.527 0 0 0 -13.05-3.56 228.894 228.894 0 0 0 -37.39 15.47 12.528 12.528 0 0 0 -6.713 11.745l2.726 53.358a178.834 178.834 0 0 0 -28.3 28.3l-53.357-2.725a12.528 12.528 0 0 0 -11.745 6.713 228.9 228.9 0 0 0 -15.47 37.389 12.528 12.528 0 0 0 3.557 13.046l39.659 35.805a177.555 177.555 0 0 0 0 39.991l-39.659 35.805a12.528 12.528 0 0 0 -3.559 13.046 228.9 228.9 0 0 0 15.47 37.389 12.528 12.528 0 0 0 11.745 6.713l53.358-2.719a178.785 178.785 0 0 0 28.3 28.3l-2.726 53.358a12.529 12.529 0 0 0 6.713 11.745 228.982 228.982 0 0 0 37.39 15.47 12.527 12.527 0 0 0 13.046-3.56l35.8-39.659a177.555 177.555 0 0 0 39.991 0l35.8 39.658a12.529 12.529 0 0 0 17.869.748 12.8 12.8 0 0 0 .456-17.846z" fill="currentColor"></path></svg>';
+  var TYPES={
+    tuned:{c:'#5f5e5a',bg:'rgba(0,0,0,0.05)',l:'Tuned'},
+    verified:{c:'#5f5e5a',bg:'rgba(0,0,0,0.05)',l:'Verified'},
+    reverted:{c:'#b45309',bg:'rgba(180,83,9,0.10)',l:'Reverted'},
+    learned:{c:'#5f5e5a',bg:'rgba(0,0,0,0.05)',l:'Learned'},
+    guard:{c:'#b45309',bg:'rgba(180,83,9,0.10)',l:'Guardrail'}
+  };
+  var LOG=[
+    {t:'tuned',when:'2h ago',pipe:'categories_offline',msg:'−18% cost this run, runtime unchanged (workers 12→8)',res:'within SLA'},
+    {t:'verified',when:'5h ago',pipe:'flight_analytics',msg:'Savings held across 5 runs, no performance impact',res:'retained'},
+    {t:'reverted',when:'9h ago',pipe:'ingestion-under-utilized-cpu',msg:'Runtime regression detected — rolled back automatically, no harm',res:'auto-rolled back'},
+    {t:'learned',when:'14h ago',pipe:'player_stats_agg',msg:'Learning this job baseline before adjusting (20 runs)',res:'baseline saved'},
+    {t:'tuned',when:'1d ago',pipe:'notebook_task_partitioned',msg:'−7% cost this run, runtime unchanged (workers 20→16)',res:'within SLA'},
+    {t:'guard',when:'1d ago',pipe:'sport-over-provision',msg:'Holding — watching 3 runs before the next change',res:'observing'},
+    {t:'tuned',when:'2d ago',pipe:'npart_data_spe',msg:'−91% vCore waste, runtime unchanged',res:'within SLA'},
+    {t:'verified',when:'3d ago',pipe:'categories_offline',msg:'Confirmed no spill or OOM after the change',res:'retained'}
+  ];
+
+  function buildDrawer(){
+    var __ex=document.getElementById('at-log-drawer'); if(__ex){ __ex.remove(); var __ov=document.getElementById('at-log-overlay'); if(__ov)__ov.remove(); }
+    var ov=document.createElement('div');
+    ov.id='at-log-overlay';
+    ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.35);z-index:4000;opacity:0;transition:opacity .2s;';
+    ov.onclick=function(e){ if(e.target===ov) closeDrawer(); };
+    var dr=document.createElement('div');
+    dr.id='at-log-drawer';
+    dr.className='MuiPaper-root MuiPaper-elevation MuiPaper-elevation16';
+    dr.style.cssText='position:fixed;top:0;right:0;bottom:0;width:440px;max-width:92vw;background:var(--mui-palette-background-paper,#fff);z-index:4001;box-shadow:var(--mui-shadows-16,-4px 0 24px rgba(0,0,0,0.12));transform:translateX(100%);transition:transform 225ms cubic-bezier(0,0,0.2,1);display:flex;flex-direction:column;';
+    var VLOG = window.__atLogCompute ? LOG.filter(function(e){return (e.pipe||'').toLowerCase()===String(window.__atLogCompute).toLowerCase();}) : LOG;
+    if(window.__atLogCompute && VLOG.length===0){ VLOG=LOG.filter(function(e){return (e.pipe||'').toLowerCase().indexOf(String(window.__atLogCompute).toLowerCase())>-1;}); }
+    var rows=VLOG.map(function(e){
+      var m=TYPES[e.t];
+      return '<div style="display:flex;gap:12px;padding:14px 0;border-bottom:1px solid rgba(0,0,0,0.07);">'
+        +'<div style="flex-shrink:0;width:26px;height:26px;border-radius:50%;background:'+m.bg+';color:'+m.c+';display:flex;align-items:center;justify-content:center;">'+WAND+'</div>'
+        +'<div style="flex:1;min-width:0;">'
+          +'<div style="display:flex;align-items:center;gap:8px;justify-content:space-between;">'
+            +'<span style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:'+m.c+';">'+m.l+'</span>'
+            +'<span style="font-size:11px;color:#9aa;">'+e.when+'</span></div>'
+          +'<div style="font-size:13px;font-weight:500;color:#292929;margin-top:1px;">'+e.pipe+'</div>'
+          +'<div style="font-size:12px;color:#666;line-height:1.45;margin-top:2px;">'+e.msg+'</div>'
+          +'<span class="at-reschip" data-label="'+e.res+'" data-kind="'+e.t+'" style="margin-top:5px;display:inline-block;"></span>'
+        +'</div></div>';
+    }).join('');
+    dr.innerHTML=
+      '<div style="padding:18px 20px;border-bottom:1px solid rgba(0,0,0,0.08);display:flex;align-items:center;justify-content:space-between;">'
+        +'<div style="display:flex;align-items:center;gap:10px;"><span style="color:#4b4b4b;display:inline-flex;">'+WAND.replace('width="14" height="14"','width="22" height="22"')+'</span>'
+        +'<div><div style="font-size:15px;font-weight:600;color:#292929;">'+(window.__atLogCompute? 'Auto-Tune log · '+window.__atLogCompute : 'Auto-Tune activity log')+'</div>'
+        +'<div style="font-size:12px;color:#888;">'+(window.__atLogCompute? 'Per-run impact for this compute' : 'Per-run impact since Auto-Tune was enabled')+'</div></div></div>'
+        +'<button id="at-log-close" style="border:0;background:transparent;font-size:22px;line-height:1;color:#888;cursor:pointer;">&times;</button>'
+      +'</div>'
+      +'<div style="padding:8px 20px 12px;display:flex;gap:10px;border-bottom:1px solid rgba(0,0,0,0.06);">'
+        +'<div><div style="font-size:18px;font-weight:700;color:var(--mui-palette-primary-dark);">'+(window.__atLogSaved||'$38K')+'</div><div style="font-size:11px;color:#888;">saved · 30d</div></div>'
+        +'<div style="margin-left:auto;text-align:right;"><div style="font-size:18px;font-weight:700;color:#292929;">'+VLOG.length+'</div><div style="font-size:11px;color:#888;">actions</div></div>'
+        +'<div style="text-align:right;"><div style="font-size:18px;font-weight:700;color:#292929;">'+(window.__atLogCompute?'1':'12')+'</div><div style="font-size:11px;color:#888;">'+(window.__atLogCompute?'pipeline':'pipelines')+'</div></div>'
+      +'</div>'
+      +'<div style="padding:14px 20px;border-bottom:1px solid rgba(0,0,0,0.06);display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;">'+ (function(){  var name=window.__atLogCompute||'All pipelines';  var tw='Jun 25 – Jul 6, 2025';  var rowsInfo=[['Pipeline',name],['Task',name+' / daily'],['Compute',name.replace(/_/g,'-')+'-compute'],['Time window',tw],['Runs in window','133'],['Last action','2h ago']];  return rowsInfo.map(function(r){return '<div><div style="font-size:11px;color:#999;">'+r[0]+'</div><div style="font-size:13px;color:#292929;font-weight:500;margin-top:1px;">'+r[1]+'</div></div>';}).join('');})()+'</div>'+'<div style="flex:1;overflow:auto;padding:4px 20px 20px;">'+rows+'</div>';
+    document.body.appendChild(ov); document.body.appendChild(dr);
+    // swap status markers for real cloned MUI Chips
+    (function(){
+      var src=document.querySelector('.MuiChip-root');
+      [...dr.querySelectorAll('.at-reschip')].forEach(function(ph){
+        var kind=ph.getAttribute('data-kind'), label=ph.getAttribute('data-label');
+        var m=TYPES[kind]||{c:'#5f5e5a',bg:'rgba(0,0,0,0.05)'};
+        if(src){
+          var chip=src.cloneNode(true);
+          var lbl=chip.querySelector('.MuiChip-label'); if(lbl) lbl.textContent=label;
+          chip.style.height='20px'; chip.style.fontSize='11px';
+          chip.style.backgroundColor=m.bg; chip.style.color=m.c;
+          ph.replaceWith(chip);
+        } else {
+          ph.textContent=label; ph.style.cssText='display:inline-block;margin-top:5px;font-size:11px;color:'+m.c+';background:'+m.bg+';padding:1px 8px;border-radius:99px;';
+        }
+      });
+    })();
+    dr.querySelector('#at-log-close').onclick=closeDrawer;
+    requestAnimationFrame(function(){ ov.style.opacity='1'; dr.style.transform='translateX(0)'; });
+  }
+  function openDrawer(name){ window.__atLogCompute = name||null; buildDrawer(); var ov=document.getElementById('at-log-overlay'),dr=document.getElementById('at-log-drawer'); void dr.getBoundingClientRect(); requestAnimationFrame(function(){ ov.style.opacity='1'; dr.style.transform='translateX(0)'; }); }
+  function closeDrawer(){ var ov=document.getElementById('at-log-overlay'),dr=document.getElementById('at-log-drawer'); if(!dr)return; ov.style.opacity='0'; dr.style.transform='translateX(100%)'; setTimeout(function(){ ov.remove(); dr.remove(); },250); }
+  window.__openAutoTuneLog=openDrawer;
+
+  ready(function(){
+    setTimeout(function(){
+      try{
+        function leaf(t){return [...document.querySelectorAll('*')].find(e=>e.textContent.trim()===t && e.children.length<=1);}
+        var sa=leaf('Savings oppt'); var cardA=sa; while(cardA && !(cardA.className&&String(cardA.className).includes('group/card'))) cardA=cardA.parentElement;
+        var at=leaf('Auto-Tune saved'); var cardB=at; while(cardB && !(cardB.className&&String(cardB.className).includes('group/card'))) cardB=cardB.parentElement;
+        if(cardA && cardB && cardA.parentElement){
+          // 1) connect the two cards: place B right after A with a connector node
+          cardA.parentElement.insertBefore(cardB, cardA.nextSibling);
+          if(!document.getElementById('at-connector')){
+            var conn=document.createElement('div');
+            conn.id='at-connector';
+            conn.style.cssText='flex:0 0 auto;align-self:center;display:flex;align-items:center;justify-content:center;margin:0 -11px;z-index:5;';
+            conn.innerHTML='<span title="Auto-Tune captures part of this opportunity" style="width:26px;height:26px;border-radius:50%;background:#fff;border:1.5px solid var(--mui-palette-primary-main);color:var(--mui-palette-primary-main);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(0,0,0,0.06);"><svg viewBox="0 0 24 24" width="14" height="14" style="fill:currentColor;"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"></path></svg></span>';
+            cardA.parentElement.insertBefore(conn, cardB);
+          }
+        }
+        // 2) add "View log" link inside Auto-Tune card
+        if(cardB && !document.getElementById('at-log-link')){
+          var link=document.createElement('a');
+          link.id='at-log-link'; link.href='javascript:void(0)';
+          link.style.cssText='display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:500;color:var(--mui-palette-primary-main);margin-top:8px;';
+          link.innerHTML='View Auto-Tune log <span style="font-size:13px;">&rarr;</span>';
+          link.onclick=openDrawer;
+          cardB.appendChild(link);
+        }
+      }catch(e){}
+    }, 120);
+  });
+})();
+</script>
+<script id="autotune-table-col">
+(function(){
+  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  ready(function(){
+    setTimeout(function(){
+      try{
+        if(document.getElementById('at-col-head')) return;
+        // 1) shrink the wide Compute(name) column so right columns are always visible
+        var nameHead=document.querySelector('[role="columnheader"][data-field="name"]');
+        if(nameHead) nameHead.style.width='280px';
+        document.querySelectorAll('.MuiDataGrid-cell[data-field="name"]').forEach(function(c){ c.style.setProperty('--width','280px'); c.style.width='280px'; });
+        // 2) add an Auto-Tuned Savings column (clone the opportunity column)
+        var oppHead=document.querySelector('[role="columnheader"][data-field="opportunity"]');
+        if(oppHead){
+          var nh=oppHead.cloneNode(true); nh.id='at-col-head'; nh.setAttribute('data-field','autotuned'); nh.setAttribute('aria-label','Auto-Tuned Savings'); nh.style.width='140px';
+          var tt=nh.querySelectorAll('.truncate'); if(tt[0]){ tt[0].style.display='flex'; tt[0].style.alignItems='center'; tt[0].style.gap='4px'; tt[0].innerHTML='<svg viewBox=\"0 0 512 512\" width=\"14\" height=\"14\" style=\"fill:#666;flex-shrink:0;\"><path d=\"m507.392 429.507-187.038-187.036a5.63 5.63 0 0 1 -1.577-4.88l6.267-38.779a30.766 30.766 0 0 0 -8.595-26.6l-59.4-59.4a30.834 30.834 0 0 0 -29.176-8.063l-40.451 10.159a12.459 12.459 0 0 0 -5.775 20.893l42.462 42.462-5.575 39.521-39.522 5.576-42.465-42.46a12.459 12.459 0 0 0 -20.893 5.775l-10.154 40.447a30.838 30.838 0 0 0 8.063 29.177l59.4 59.4a30.761 30.761 0 0 0 26.6 8.594l38.78-6.267a5.639 5.639 0 0 1 4.877 1.577l188.719 188.727a12.531 12.531 0 0 0 17.719 0c4.876-4.875 4.613-13.111-.263-17.986l-188.458-188.457a30.755 30.755 0 0 0 -26.6-8.6l-38.78 6.267a5.648 5.648 0 0 1 -4.878-1.576l-59.4-59.4a5.66 5.66 0 0 1 -1.48-5.351l4.745-18.892 32.356 32.359a9.152 9.152 0 0 0 7.746 2.589l62.139-8.766a5.265 5.265 0 0 0 4.477-4.477l8.768-62.14a9.149 9.149 0 0 0 -2.589-7.745l-32.36-32.36 18.893-4.745a5.655 5.655 0 0 1 5.35 1.479l59.4 59.405a5.628 5.628 0 0 1 1.576 4.877l-6.267 38.779a30.765 30.765 0 0 0 8.595 26.6l187.338 187.332a12.531 12.531 0 0 0 17.886-.169 12.8 12.8 0 0 0 -.46-17.846z\"></path><path d=\"m254.6 373.865a12.528 12.528 0 0 0 -11.185-3.99 152.757 152.757 0 0 1 -45.991 0 12.528 12.528 0 0 0 -11.185 3.99l-34.721 38.459c-6.322-2.258-12.54-4.83-18.6-7.7l2.643-51.731a12.527 12.527 0 0 0 -5.084-10.728 153.805 153.805 0 0 1 -32.552-32.551 12.526 12.526 0 0 0 -10.728-5.083l-51.737 2.645c-2.865-6.061-5.439-12.28-7.695-18.6l38.458-34.72a12.53 12.53 0 0 0 3.99-11.186 152.666 152.666 0 0 1 0-45.992 12.528 12.528 0 0 0 -3.99-11.186l-38.457-34.72c2.256-6.323 4.83-12.542 7.7-18.6l51.729 2.643a12.529 12.529 0 0 0 10.728-5.083 153.805 153.805 0 0 1 32.547-32.559 12.527 12.527 0 0 0 5.084-10.728l-2.643-51.731c6.062-2.866 12.28-5.439 18.6-7.695l34.72 38.458a12.529 12.529 0 0 0 11.186 3.99 152.712 152.712 0 0 1 45.994 0 12.529 12.529 0 0 0 11.186-3.99l34.72-38.458c6.322 2.256 12.541 4.83 18.6 7.7l-2.643 51.73a12.527 12.527 0 0 0 5.084 10.728 153.779 153.779 0 0 1 32.552 32.552 12.529 12.529 0 0 0 10.728 5.083l51.73-2.643c2.865 6.063 5.438 12.28 7.695 18.6l-38.458 34.72a12.529 12.529 0 0 0 -3.99 11.186 152.705 152.705 0 0 1 0 45.993 12.53 12.53 0 0 0 3.99 11.186l44.547 40.219a12.532 12.532 0 0 0 17.853-1.079 12.8 12.8 0 0 0 -1.368-17.8l-39.337-35.528a177.555 177.555 0 0 0 0-39.991l39.659-35.805a12.528 12.528 0 0 0 3.559-13.046 228.9 228.9 0 0 0 -15.469-37.389 12.528 12.528 0 0 0 -11.745-6.714l-53.358 2.725a178.834 178.834 0 0 0 -28.3-28.3l2.725-53.357a12.528 12.528 0 0 0 -6.713-11.745 228.873 228.873 0 0 0 -37.393-15.47 12.528 12.528 0 0 0 -13.046 3.559l-35.805 39.66a177.563 177.563 0 0 0 -39.992 0l-35.8-39.659a12.527 12.527 0 0 0 -13.05-3.56 228.894 228.894 0 0 0 -37.39 15.47 12.528 12.528 0 0 0 -6.713 11.745l2.726 53.358a178.834 178.834 0 0 0 -28.3 28.3l-53.357-2.725a12.528 12.528 0 0 0 -11.745 6.713 228.9 228.9 0 0 0 -15.47 37.389 12.528 12.528 0 0 0 3.557 13.046l39.659 35.805a177.555 177.555 0 0 0 0 39.991l-39.659 35.805a12.528 12.528 0 0 0 -3.559 13.046 228.9 228.9 0 0 0 15.47 37.389 12.528 12.528 0 0 0 11.745 6.713l53.358-2.719a178.785 178.785 0 0 0 28.3 28.3l-2.726 53.358a12.529 12.529 0 0 0 6.713 11.745 228.982 228.982 0 0 0 37.39 15.47 12.527 12.527 0 0 0 13.046-3.56l35.8-39.659a177.555 177.555 0 0 0 39.991 0l35.8 39.658a12.529 12.529 0 0 0 17.869.748 12.8 12.8 0 0 0 .456-17.846z\"></path></svg><span style=\"overflow:hidden;text-overflow:ellipsis;white-space:nowrap;\">Auto-Tuned Savings</span>'; } if(tt[1]) tt[1].textContent='Annualized';
+          oppHead.insertAdjacentElement('beforebegin', nh);
+        }
+        var statusMap=['tuning','tuning','off','eligible','tuning','off','eligible','off','off','tuning','off','eligible','off'];
+        var vals=['$8.6K','$3.4K','—','—','$2.1K','—','—','—','—','$1.2K','—','—','—'];
+        var oppCells=[...document.querySelectorAll('.MuiDataGrid-cell[data-field="opportunity"]')];
+        oppCells.forEach(function(c,i){
+          var nc=c.cloneNode(true); nc.setAttribute('data-field','autotuned'); nc.style.setProperty('--width','140px'); nc.style.width='140px';
+          var tuned=statusMap[i]==='tuning';
+          nc.innerHTML='<span style="font-size:0.8rem;font-weight:'+(tuned?'600':'400')+';color:'+(tuned?'var(--mui-palette-primary-dark)':'#bbb')+';">'+(vals[i]||'—')+'</span>';
+          nc.classList.remove('bg-success-lightest','dark:bg-success-dark'); nc.style.backgroundColor='transparent';
+          c.insertAdjacentElement('beforebegin', nc);
+        });
+      }catch(e){}
+    },300);
+  });
+})();
+</script>
+<script id="autotune-percompute-log">
+(function(){
+  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  ready(function(){
+    function wire(){
+      var cells=[...document.querySelectorAll('.MuiDataGrid-cell[data-field="autotuned"]')];
+      cells.forEach(function(cell){
+        var txt=cell.textContent.trim();
+        if(!txt || txt==='—' || txt==='-') return;
+        if(cell.getAttribute('data-at-wired')) return;
+        cell.setAttribute('data-at-wired','1');
+        var inner=cell.querySelector('*')||cell;
+        inner.style.cursor='pointer';
+        inner.style.color='var(--mui-palette-primary-main)';
+        inner.style.textDecoration='none';
+        inner.style.fontWeight='400';
+        cell.addEventListener('click', function(e){
+          e.stopPropagation();
+          var row=cell.closest('[data-id],[role="row"]');
+          var nameCell=row?row.querySelector('.MuiDataGrid-cell[data-field="name"]'):null;
+          var name=nameCell?(nameCell.querySelector('a')?nameCell.querySelector('a').textContent.trim():(nameCell.querySelector('.leading-5')?nameCell.querySelector('.leading-5').textContent.trim():nameCell.textContent.trim())):null;
+          window.__atLogSaved = txt;
+          if(window.__openAutoTuneLog) window.__openAutoTuneLog(name);
+        });
+      });
+    }
+    setTimeout(wire, 600);
+    setTimeout(wire, 1500);
+    // re-wire on scroll (virtualized grid)
+    setTimeout(function(){
+      var vp=document.querySelector('.MuiDataGrid-virtualScroller');
+      if(vp) vp.addEventListener('scroll', function(){ setTimeout(wire,100); });
+    }, 700);
+  });
+})();
+</script>
+<script id="autotune-killfiller">
+(function(){
+  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  ready(function(){
+    function run(){
+      var anchor=document.querySelector('.MuiDataGrid-cell[data-field="autotuned"]');
+      if(!anchor) return;
+      var grid=anchor.closest('.MuiDataGrid-root');
+      if(!grid || grid.getAttribute('data-at-fixed')) return;
+      var bh=grid.querySelector('[role="columnheader"][data-field="autotuned"] .MuiBadge-badge'); if(bh) bh.style.display='none';
+      // exact gap = scroller inner width - sum of real column widths
+      var scroller=grid.querySelector('.MuiDataGrid-virtualScroller')||grid;
+      var avail=scroller.clientWidth;
+      var fields=['name','count','cost','waste','utilization','autotuned','opportunity'];
+      var sum=0;
+      fields.forEach(function(fl){
+        var h=grid.querySelector('[role="columnheader"][data-field="'+fl+'"]');
+        if(h) sum+=h.getBoundingClientRect().width;
+      });
+      var gap=Math.round(avail-sum);
+      if(gap<=2) { grid.setAttribute('data-at-fixed','1'); return; }
+      var heads=[...grid.querySelectorAll('[role="columnheader"][data-field="name"]')];
+      var cells=[...grid.querySelectorAll('.MuiDataGrid-cell[data-field="name"]')];
+      var newW=Math.round(heads[0].getBoundingClientRect().width+gap);
+      heads.forEach(function(h){h.style.width=newW+'px';h.style.minWidth=newW+'px';h.style.maxWidth=newW+'px';});
+      cells.forEach(function(c){c.style.width=newW+'px';c.style.minWidth=newW+'px';c.style.maxWidth=newW+'px';c.style.setProperty('--width',newW+'px');});
+      [...grid.querySelectorAll('.MuiDataGrid-filler')].forEach(function(x){var w=Math.round(x.getBoundingClientRect().width); if(w>0&&w<500)x.style.width='0px';});
+      grid.setAttribute('data-at-fixed','1');
+    }
+    setTimeout(run,800); setTimeout(run,1700);
+  });
+})();
+</script>
+
+<script id="autotune-strip-balance">
+(function(){
+  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  ready(function(){
+    function run(){
+      var g=document.getElementById('at-savings-group'); if(!g) return;
+      var row=g.parentElement; var grand=row.parentElement;
+      if(!grand || grand.children.length<2 || grand.getAttribute('data-at-balanced')) return;
+      // left section (dual-metric cards) narrower; right section (with savings group) wider
+      grand.children[0].style.flex='5 1 0%';
+      grand.children[1].style.flex='7 1 0%';
+      grand.setAttribute('data-at-balanced','1');
+    }
+    setTimeout(run,900); setTimeout(run,1800);
+  });
+})();
+</script>
+
+<script id="autotune-row-nav">
+(function(){
+  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  function goTask(){
+    try{ if(window.parent && window.parent.show){ window.parent.show('autotune-task'); return true; } }catch(e){}
+    try{ if(window.top && window.top.show){ window.top.show('autotune-task'); return true; } }catch(e){}
+    return false;
+  }
+  ready(function(){
+    function wire(){
+      var anchor=document.querySelector('.MuiDataGrid-cell[data-field="autotuned"]');
+      if(!anchor) return;
+      var grid=anchor.closest('.MuiDataGrid-root');
+      var rows=[...grid.querySelectorAll('.MuiDataGrid-row')];
+      rows.forEach(function(r){
+        if(r.getAttribute('data-at-rownav')) return;
+        r.setAttribute('data-at-rownav','1');
+        r.style.cursor='pointer';
+        r.addEventListener('click', function(e){
+          // savings cell keeps its own log drawer
+          if(e.target.closest('.MuiDataGrid-cell[data-field="autotuned"]')) return;
+          e.preventDefault();
+          goTask();
+        });
+      });
+      // neutralize external name links so they route through the prototype nav
+      [...grid.querySelectorAll('.MuiDataGrid-cell[data-field="name"] a')].forEach(function(a){
+        if(a.getAttribute('data-at-rownav')) return;
+        a.setAttribute('data-at-rownav','1');
+        a.addEventListener('click', function(e){ e.preventDefault(); goTask(); });
+      });
+    }
+    setTimeout(wire,900); setTimeout(wire,1800);
+    setTimeout(function(){ var vp=document.querySelector('.MuiDataGrid-virtualScroller'); if(vp) vp.addEventListener('scroll',function(){setTimeout(wire,120);}); },1000);
+  });
+})();
+</script>
+
+
+<script id="autotune-sidebar-toggle">
+(function(){
+  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  ready(function(){
+    function run(){
+      var sb=document.querySelector('.sidebar'); if(!sb || sb.getAttribute('data-at-toggle')) return;
+      var icon=sb.querySelector('[data-test-id="arrow-forward-icon"]');
+      var toggle=icon?icon.closest('.cursor-pointer'):null;
+      if(!toggle) return;
+      sb.setAttribute('data-at-toggle','1');
+      var COLLAPSED=Math.round(sb.getBoundingClientRect().width)||53, EXPANDED=220;
+      sb.style.transition='width 200ms cubic-bezier(0.4,0,0.2,1)';
+      if(icon) icon.style.transition='transform 200ms cubic-bezier(0.4,0,0.2,1)';
+      var labels=[...sb.querySelectorAll('[data-test-id="sidebar-navigation-item"] span')];
+      labels.forEach(function(l){ l.style.transition='opacity 160ms ease'; });
+      var open=false;
+      function render(){
+        sb.style.width=(open?EXPANDED:COLLAPSED)+'px';
+        if(icon) icon.style.transform=open?'rotate(180deg)':'rotate(0deg)';
+        labels.forEach(function(l){ l.style.opacity=open?'1':'0'; l.style.marginLeft=open?'8px':''; });
+      }
+      render();
+      toggle.addEventListener('click', function(e){ e.stopPropagation(); open=!open; render(); });
+    }
+    setTimeout(run,700); setTimeout(run,1600);
   });
 })();
 </script>

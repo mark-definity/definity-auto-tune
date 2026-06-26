@@ -140,3 +140,124 @@ Use this action for critical assets"><svg class="MuiSvgIcon-root MuiSvgIcon-font
   });
 })();
 </script>
+
+<script id="autotune-sidebar-toggle">
+(function(){
+  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  ready(function(){
+    function run(){
+      var sb=document.querySelector('.sidebar'); if(!sb || sb.getAttribute('data-at-toggle')) return;
+      var icon=sb.querySelector('[data-test-id="arrow-forward-icon"]');
+      var toggle=icon?icon.closest('.cursor-pointer'):null;
+      if(!toggle) return;
+      sb.setAttribute('data-at-toggle','1');
+      var COLLAPSED=Math.round(sb.getBoundingClientRect().width)||53, EXPANDED=220;
+      sb.style.transition='width 200ms cubic-bezier(0.4,0,0.2,1)';
+      if(icon) icon.style.transition='transform 200ms cubic-bezier(0.4,0,0.2,1)';
+      var labels=[...sb.querySelectorAll('[data-test-id="sidebar-navigation-item"] span')];
+      labels.forEach(function(l){ l.style.transition='opacity 160ms ease'; });
+      var open=false;
+      function render(){
+        sb.style.width=(open?EXPANDED:COLLAPSED)+'px';
+        if(icon) icon.style.transform=open?'rotate(180deg)':'rotate(0deg)';
+        labels.forEach(function(l){ l.style.opacity=open?'1':'0'; l.style.marginLeft=open?'8px':''; });
+      }
+      render();
+      toggle.addEventListener('click', function(e){ e.stopPropagation(); open=!open; render(); });
+    }
+    setTimeout(run,700); setTimeout(run,1600);
+  });
+})();
+</script>
+<script id="autotune-page-filters">
+(function(){
+  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded',fn); }
+  ready(function(){
+    setTimeout(function(){
+      try{
+        if(document.getElementById('at-filter-bar')) return;
+        var list=document.getElementById('at-log-list'); if(!list) return;
+        var oldChip=document.querySelector('.at-filter'); if(!oldChip) return;
+        var oldRow=oldChip.parentElement;
+        var rows=[...list.querySelectorAll('.at-row')];
+        // tag each row with its pipeline name for searching/sorting
+        rows.forEach(function(r){
+          var t=r.textContent.replace(/\s+/g,' ').trim();
+          r.setAttribute('data-search', t.toLowerCase());
+        });
+
+        var TYPES=[['all','All'],['tuned','Tuned'],['verified','Verified'],['reverted','Reverted'],['learned','Learned'],['guard','Guardrail']];
+        var state={type:'all', q:'', sort:'newest'};
+
+        // --- clone a real MUI chip as the template ---
+        var chipTpl=document.querySelector('.MuiChip-root');
+        function makeChip(label, active){
+          var c=chipTpl.cloneNode(true);
+          c.removeAttribute('tabindex');
+          // strip any inner delete icon / extra nodes, keep label span
+          var lbl=c.querySelector('.MuiChip-label')||c;
+          [...c.childNodes].forEach(function(n){ if(n!==lbl && n.nodeType===1 && !n.classList.contains('MuiChip-label')) n.remove(); });
+          lbl.textContent=label;
+          c.style.cursor='pointer'; c.style.height='28px';
+          styleChip(c, active);
+          return c;
+        }
+        function styleChip(c, active){
+          if(active){ c.style.backgroundColor='var(--mui-palette-primary-lightest)'; c.style.color='var(--mui-palette-primary-dark)'; c.style.border='1px solid transparent'; }
+          else { c.style.backgroundColor='transparent'; c.style.color='var(--mui-palette-text-secondary)'; c.style.border='1px solid var(--mui-palette-divider)'; }
+        }
+
+        // --- build toolbar ---
+        var bar=document.createElement('div'); bar.id='at-filter-bar';
+        bar.style.cssText='display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;';
+        var typeWrap=document.createElement('div'); typeWrap.style.cssText='display:flex;gap:8px;flex-wrap:wrap;';
+        var typeChips={};
+        TYPES.forEach(function(p){ var c=makeChip(p[1], p[0]===state.type); c.onclick=function(){ state.type=p[0]; Object.keys(typeChips).forEach(function(k){ styleChip(typeChips[k], k===state.type); }); apply(); }; typeChips[p[0]]=c; typeWrap.appendChild(c); });
+        bar.appendChild(typeWrap);
+
+        var right=document.createElement('div'); right.style.cssText='display:flex;align-items:center;gap:8px;margin-left:auto;';
+
+        // search field cloned from a real MUI outlined input
+        var inpRoot=document.querySelector('.MuiOutlinedInput-root');
+        var searchBox;
+        if(inpRoot){
+          searchBox=inpRoot.cloneNode(true);
+          searchBox.style.width='240px'; searchBox.style.backgroundColor='var(--mui-palette-background-paper)';
+          var fld=searchBox.querySelector('input'); if(fld){ fld.value=''; fld.removeAttribute('id'); fld.removeAttribute('name'); fld.placeholder='Search pipeline or action…'; fld.addEventListener('input', function(){ state.q=fld.value.toLowerCase(); apply(); }); }
+          right.appendChild(searchBox);
+        }
+
+        // sort chips
+        var sortWrap=document.createElement('div'); sortWrap.style.cssText='display:flex;gap:6px;';
+        var sortChips={};
+        [['newest','Newest'],['oldest','Oldest'],['pipe','A–Z']].forEach(function(p){ var c=makeChip(p[1], p[0]===state.sort); c.onclick=function(){ state.sort=p[0]; Object.keys(sortChips).forEach(function(k){ styleChip(sortChips[k], k===state.sort); }); apply(); }; sortChips[p[0]]=c; sortWrap.appendChild(c); });
+        right.appendChild(sortWrap);
+        bar.appendChild(right);
+
+        // results count
+        var count=document.createElement('div'); count.id='at-filter-count';
+        count.style.cssText='font-size:12px;color:var(--mui-palette-text-secondary);margin-bottom:10px;';
+
+        oldRow.replaceWith(bar);
+        bar.insertAdjacentElement('afterend', count);
+
+        var origOrder=rows.slice();
+        function apply(){
+          var shown=0;
+          rows.forEach(function(r){
+            var okT=state.type==='all'||r.getAttribute('data-type')===state.type;
+            var okQ=!state.q || r.getAttribute('data-search').indexOf(state.q)>-1;
+            var vis=okT&&okQ; r.style.display=vis?'flex':'none'; if(vis) shown++;
+          });
+          var order=origOrder.slice();
+          if(state.sort==='oldest') order=order.slice().reverse();
+          else if(state.sort==='pipe') order=order.slice().sort(function(a,b){ return a.getAttribute('data-search').localeCompare(b.getAttribute('data-search')); });
+          order.forEach(function(r){ list.appendChild(r); });
+          count.textContent=shown+(shown===1?' result':' results');
+        }
+        apply();
+      }catch(e){ console.error('at-filters',e); }
+    },260);
+  });
+})();
+</script>
