@@ -38,11 +38,11 @@
       { id:'dash',              label:'Dashboard',       src:'02-auto-tune-dashboard.html' },
       { id:'dash-pipelines',    label:'',                src:'11-auto-tune-dashboard-pipelines.html', hidden:true, aliasOf:'dash' },
       { id:'autotune-compute',  label:'Compute',         src:'08-auto-tune-compute.html' },
-      { id:'autotune-pipelines',label:'Pipelines',       src:'09-auto-tune-pipelines.html' },
-      { id:'pipeline-detail',   label:'Pipeline',        src:'10-auto-tune-pipeline-detail.html' },
+      { id:'pipeline-detail',   label:'Pipeline',        src:'10-auto-tune-pipeline-detail.html', hidden:true },
       { id:'autotune-task',     label:'Task',            src:'06-auto-tune-task.html' },
-      { id:'run',               label:'Task run log',    src:'03-auto-tune-run-detail.html' },
+      { id:'run',               label:'Task run log',    src:'03-auto-tune-run-detail.html', hidden:true },
       { id:'autotune',          label:'Auto-Tune Page',  src:'05-auto-tune-page.html' },
+      { id:'autotune-pipelines',label:'Pipelines',       src:'09-auto-tune-pipelines.html' },
       { id:'settings',          label:'Settings',        src:'04-auto-tune-settings.html' },
       { id:'insight',           label:'Insights ❓',      src:'01-auto-tune-sidebar.html' },
     ];
@@ -66,7 +66,33 @@
         var b = document.getElementById('b-' + t.id);
         if(b) b.classList.toggle('active', t.id === btnTarget);
       });
+      var hb = document.getElementById('b-hidden-menu');
+      if(hb) hb.classList.toggle('active', !!(tab.hidden && !tab.aliasOf));
     }
+    // hidden-pages menu (right side)
+    (function(){
+      var hiddenTabs = TABS.filter(function(t){ return t.hidden && t.label; });
+      if(!hiddenTabs.length) return;
+      var hb = document.createElement('button');
+      hb.id = 'b-hidden-menu';
+      hb.textContent = '\u22EF';
+      hb.title = 'Hidden pages';
+      seg.appendChild(hb);
+      var menu = document.createElement('div');
+      menu.style.cssText = 'position:absolute;top:46px;right:16px;background:#fff;border-radius:8px;box-shadow:0 6px 20px rgba(0,0,0,0.3);padding:4px;display:none;z-index:99;min-width:160px;';
+      hiddenTabs.forEach(function(t){
+        var it = document.createElement('button');
+        it.textContent = t.label;
+        it.style.cssText = 'display:block;width:100%;text-align:left;border:0;background:transparent;font-family:inherit;font-size:13px;padding:7px 12px;border-radius:6px;cursor:pointer;color:#422006;';
+        it.onmouseenter = function(){ it.style.background = '#faf3e0'; };
+        it.onmouseleave = function(){ it.style.background = 'transparent'; };
+        it.onclick = function(){ show(t.id); menu.style.display = 'none'; };
+        menu.appendChild(it);
+      });
+      document.body.appendChild(menu);
+      hb.onclick = function(e){ e.stopPropagation(); menu.style.display = menu.style.display === 'none' ? 'block' : 'none'; };
+      document.addEventListener('click', function(e){ if(!menu.contains(e.target)) menu.style.display = 'none'; });
+    })();
   </script>
 </body>
 </html>
