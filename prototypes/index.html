@@ -36,28 +36,35 @@
   <script>
     var TABS = [
       { id:'dash',              label:'Dashboard',       src:'02-auto-tune-dashboard.html' },
+      { id:'dash-pipelines',    label:'',                src:'11-auto-tune-dashboard-pipelines.html', hidden:true, aliasOf:'dash' },
+      { id:'autotune-compute',  label:'Compute',         src:'08-auto-tune-compute.html' },
+      { id:'autotune-pipelines',label:'Pipelines',       src:'09-auto-tune-pipelines.html' },
+      { id:'pipeline-detail',   label:'Pipeline',        src:'10-auto-tune-pipeline-detail.html' },
+      { id:'autotune-task',     label:'Task',            src:'06-auto-tune-task.html' },
       { id:'run',               label:'Task run log',    src:'03-auto-tune-run-detail.html' },
-      { id:'autotune-pipeline', label:'AT · Pipeline',   src:'07-auto-tune-pipeline.html' },
-      { id:'autotune-task',     label:'AT · Task',       src:'06-auto-tune-task.html' },
-      { id:'autotune-compute',  label:'AT · Compute',    src:'08-auto-tune-compute.html' },
-      { id:'autotune',          label:'Auto-Tune',       src:'05-auto-tune-page.html' },
+      { id:'autotune',          label:'Auto-Tune Page',  src:'05-auto-tune-page.html' },
       { id:'settings',          label:'Settings',        src:'04-auto-tune-settings.html' },
-      { id:'insight',           label:'Insight panel ❓', src:'01-auto-tune-sidebar.html' },
+      { id:'insight',           label:'Insights ❓',      src:'01-auto-tune-sidebar.html' },
     ];
     var seg = document.getElementById('seg'), stage = document.getElementById('stage');
     TABS.forEach(function(t, i){
-      var b = document.createElement('button');
-      b.textContent = t.label; b.id = 'b-' + t.id; if (i===0) b.className = 'active';
-      b.onclick = function(){ show(t.id); };
-      seg.appendChild(b);
+      if(!t.hidden){
+        var b = document.createElement('button');
+        b.textContent = t.label; b.id = 'b-' + t.id; if (i===0) b.className = 'active';
+        b.onclick = function(){ show(t.id); };
+        seg.appendChild(b);
+      }
       var f = document.createElement('iframe');
       f.id = 'f-' + t.id; f.src = t.src + '?v=' + Date.now(); if (i!==0) f.className = 'hidden';
       stage.appendChild(f);
     });
     function show(id){
+      var tab = TABS.filter(function(t){ return t.id === id; })[0] || {};
+      var btnTarget = tab.aliasOf || id;
       TABS.forEach(function(t){
         document.getElementById('f-' + t.id).classList.toggle('hidden', t.id !== id);
-        document.getElementById('b-' + t.id).classList.toggle('active', t.id === id);
+        var b = document.getElementById('b-' + t.id);
+        if(b) b.classList.toggle('active', t.id === btnTarget);
       });
     }
   </script>

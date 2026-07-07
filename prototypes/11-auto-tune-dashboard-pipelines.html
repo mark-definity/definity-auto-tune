@@ -633,17 +633,16 @@ var row=cardB.parentElement;
         if(c.getAttribute('data-at-compute')) return;
         var lead=c.querySelector('.leading-5'); if(!lead) return;
         var a=lead.querySelector('a'); if(!a) return;
-        var chip=[...lead.children].find(function(el){ return el.classList && el.classList.contains('MuiChip-root'); });
-        var row=document.createElement('div');
-        row.style.cssText='display:flex;align-items:center;gap:8px;min-width:0;';
-        lead.insertBefore(row, lead.firstChild);
-        row.appendChild(a);
-        a.style.minWidth='0';
-        if(chip){ chip.style.flexShrink='0'; row.appendChild(chip); }
-        a.addEventListener('click', function(e){ e.preventDefault(); });
+        var sub=[...lead.querySelectorAll('div')].find(function(d){ return d.querySelector('svg') && d.textContent.trim(); });
+        var slug=sub?sub.textContent.trim():a.textContent.trim();
+        var hadTuning=[...lead.querySelectorAll('.MuiChip-root')].some(function(ch){ return ch.textContent.trim()==='Auto-Tuning'; });
+        var wrap=document.createElement('div'); wrap.style.cssText='display:flex;align-items:center;gap:8px;min-width:0;';
+        var chip=window.AutoTuneChip('<strong>pipeline</strong>: '+slug,{variant:'outlined',html:true,height:'24px',fontSize:'13px'});
+        if(chip){ chip.style.flex='0 0 auto'; chip.style.whiteSpace='nowrap'; var _l=chip.querySelector('.MuiChip-label'); if(_l) _l.style.cssText='white-space:nowrap;'; wrap.appendChild(chip); }
+        if(hadTuning && window.AutoTuneChip){ var t=window.AutoTuneChip('Auto-Tuning',{height:'24px'}); if(t){ t.style.flexShrink='0'; t.style.marginLeft='0'; wrap.appendChild(t); } }
+        lead.replaceWith(wrap);
         c.setAttribute('data-at-compute','1');
-        c.style.cursor='pointer';
-        c.addEventListener('click', function(e){ e.stopPropagation(); try{ if(window.parent&&window.parent.show) window.parent.show('autotune-compute'); }catch(err){} });
+        wrap.addEventListener('click', function(e){ e.stopPropagation(); try{ if(window.parent&&window.parent.show) window.parent.show('pipeline-detail'); }catch(err){} });
       });
     }
     setTimeout(run,900); setTimeout(run,1800);
